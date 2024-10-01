@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.extism.chicory.sdk.Manifest;
 import org.extism.chicory.sdk.ManifestWasm;
 import org.extism.chicory.sdk.Plugin;
+import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +15,8 @@ public class KafkaFilter {
         Plugin plugin = Plugin.ofManifest(Manifest.ofWasms(wasm).build()).build();
         return new KafkaFilter(plugin, ext);
     }
+
+    private static Logger logger = Logger.getLogger(KafkaFilter.class);
 
     private final Plugin plugin;
     private final XTPService.Extension extension;
@@ -32,7 +35,10 @@ public class KafkaFilter {
     }
 
     public byte[] transformBytes(byte[] recordBytes) {
-        return plugin.call("transform", recordBytes);
+        logger.infof("transforming: %s", new String(recordBytes));
+        byte[] result = plugin.call("transform", recordBytes);
+        logger.infof("result: %s", new String(result));
+        return result;
     }
 
 }

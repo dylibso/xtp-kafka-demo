@@ -2,12 +2,14 @@ package com.dylibso.examples.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class FilterStore {
     private final ConcurrentHashMap<String, KafkaFilter> filters = new ConcurrentHashMap<>();
@@ -25,6 +27,7 @@ public class FilterStore {
 
     /**
      * Unconditionally register the given KafkaFilter, overwriting anything already registered.
+     *
      * @param f
      */
     public void register(KafkaFilter f) {
