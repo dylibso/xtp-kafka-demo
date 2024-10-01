@@ -9,6 +9,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.util.Collection;
 
 @ApplicationScoped
 public class XTPProvider {
@@ -37,18 +38,22 @@ public class XTPProvider {
         var extensions = serviceClient.fetch(extensionPoint, guestKey);
         for (var ext : extensions.values()) {
             try (var dataStream = serviceClient.fetchContent(ext.contentAddress())) {
-                filterStore.update(KafkaFilter.fromInputStream(ext, dataStream));
+                filterStore.register(KafkaFilter.fromInputStream(ext, dataStream));
             }
         }
     }
 
-    @Scheduled(every = "30s")
-    void checkUpdates() {
+    @Scheduled(delay = 100, every = "30s")
+    void checkUpdates() throws IOException {
         var extensions = serviceClient.fetch(extensionPoint, guestKey);
-        for (XTPService.Extension exts : extensions.values()) {
-            filterStore.update();
+        Collection<XTPService.Extension> newExtensions = filterStore.newer(extensions.values());
+        for (var ext : newExtensions) {
+            try (var dataStream = serviceClient.fetchContent(ext.contentAddress())) {
+                filterStore.update(KafkaFilter.fromInputStream(ext, dataStream));
+            }
         }
-        filterStore.update(KafkaFilter.fromInputStream());
+
+
     }
 
 }

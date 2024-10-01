@@ -1,33 +1,69 @@
 package com.dylibso.examples.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.smallrye.mutiny.Multi;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FilterStore {
     private final ConcurrentHashMap<String, KafkaFilter> filters = new ConcurrentHashMap<>();
 
-    public void update(KafkaFilter f) {
-        // Update the filter with the incoming filter only if not present, and if it is newer than the filter that we have.
-        filters.merge(f.extension().id(), f, (current, incoming) ->
-                current.extension().updatedAt().isAfter(incoming.extension().updatedAt()) ? current : incoming);
+    /**
+     * Applies the transform to the given record, serializing with the provided ObjectMapper.
+     */
+    public Multi<Record> transform(Record r, ObjectMapper mapper) throws IOException {
+        byte[] bytes = mapper.writeValueAsBytes(r);
+        return Multi.createFrom()
+                .iterable(filters.values())
+                .map(f -> f.transformBytes(bytes))
+                .map(bs -> toRecord(mapper, bs));
+    }
+
+    /**
+     * Unconditionally register the given KafkaFilter, overwriting anything already registered.
+     * @param f
+     */
+    public void register(KafkaFilter f) {
         filters.put(f.extension().id(), f);
     }
 
-    public Collection<Record> transform(Record r, ObjectMapper mapper) throws IOException {
-        byte[] bytes = mapper.writeValueAsBytes(r);
-        return filters.values().stream().parallel()
-                .map(f -> f.transformBytes(bytes)).map(bs -> toRecord(mapper, bs)).toList();
+    /**
+     * Update if the provided KafkaFilter is newer than the one in the store,
+     * by checking its property {@link XTPService.Extension#updatedAt()}.
+     */
+    public void update(KafkaFilter kafkaFilter) {
+        filters.merge(kafkaFilter.extension().id(), kafkaFilter, (existing, candidate) ->
+                existing.extension().updatedAt().isBefore(candidate.extension().updatedAt()) ?
+                        candidate : existing);
     }
 
-    private Record toRecord(ObjectMapper mapper, byte[] bs){
+    /**
+     * Returns the subset of the given candidates newer than those registered in the store.
+     */
+    public Collection<XTPService.Extension> newer(Collection<XTPService.Extension> candidates) {
+        Collection<XTPService.Extension> result = new ArrayList<>();
+        for (var candidate : candidates) {
+            var existing = filters.get(candidate.id());
+            if (existing == null) {
+                continue;
+            }
+            if (existing.extension().updatedAt().isBefore(candidate.updatedAt())) {
+                result.add(candidate);
+            }
+        }
+        return result;
+    }
+
+    private Record toRecord(ObjectMapper mapper, byte[] bs) {
         try {
             return mapper.readValue(bs, Record.class);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
+
 }
