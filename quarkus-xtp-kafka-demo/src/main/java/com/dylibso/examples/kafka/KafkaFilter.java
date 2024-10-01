@@ -16,7 +16,7 @@ public class KafkaFilter {
         return new KafkaFilter(plugin, ext);
     }
 
-    private static Logger logger = Logger.getLogger(KafkaFilter.class);
+    private static final Logger logger = Logger.getLogger(KafkaFilter.class);
 
     private final Plugin plugin;
     private final XTPService.Extension extension;

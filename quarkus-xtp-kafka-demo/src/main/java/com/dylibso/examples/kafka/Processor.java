@@ -25,7 +25,9 @@ public class Processor {
     @Acknowledgment(Acknowledgment.Strategy.POST_PROCESSING)
     Multi<Message<byte[]>> read(KafkaRecord<byte[], byte[]> pricingData) throws IOException {
         var r = Record.of(pricingData);
-        var transform = filters.transform(r, mapper).map(rec ->(Message<byte[]>) KafkaRecord.of(rec.topic(), rec.key(), rec.value()));
-        return transform;
+        return filters.transform(r, mapper)
+                .map(rec -> (Message<byte[]>)
+                        KafkaRecord.of(rec.topic(), rec.key(), rec.value()))
+                .onTermination().invoke(pricingData::ack);
     }
 }
