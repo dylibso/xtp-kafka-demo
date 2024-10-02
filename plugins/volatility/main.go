@@ -28,13 +28,11 @@ const period = 14
 type window struct {
 	closing [period]float64
 	volume  [period]float64
-	index   int
+	index   uint
 }
 
 var (
-	w = &window{
-		closing: [14]float64{1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 4, 4},
-		volume:  [14]float64{1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 4, 4}}
+	w = &window{closing: [period]float64{}, volume: [14]float64{}, index: 0}
 )
 
 // This function takes a Record and returns a Record.
@@ -93,8 +91,4 @@ func parse(in string) (p price, err error) {
 	}
 	p.volume, err = strconv.ParseUint(s[5], 10, 64)
 	return
-}
-
-func (p *price) serialize() string {
-	return fmt.Sprintf("%s,%f,%f")
 }
