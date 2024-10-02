@@ -12,20 +12,26 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class KafkaFilter {
-    public static KafkaFilter fromInputStream(XTPService.Extension ext, InputStream is) throws IOException {
+    public static KafkaFilter fromInputStream(String pluginName, XTPService.Extension ext, InputStream is) throws IOException {
         ManifestWasm wasm = ManifestWasm.fromBytes(is.readAllBytes()).build();
         Plugin plugin = Plugin.ofManifest(Manifest.ofWasms(wasm).build()).build();
-        return new KafkaFilter(plugin, ext);
+        return new KafkaFilter(plugin, pluginName, ext);
     }
 
     private static final Logger logger = Logger.getLogger(KafkaFilter.class);
 
     private final Plugin plugin;
+    private final String pluginName;
     private final XTPService.Extension extension;
 
-    public KafkaFilter(Plugin plugin, XTPService.Extension extension) {
+    public KafkaFilter(Plugin plugin, String pluginName, XTPService.Extension extension) {
         this.plugin = plugin;
+        this.pluginName = pluginName;
         this.extension = extension;
+    }
+
+    public String name() {
+        return pluginName;
     }
 
     public XTPService.Extension extension() {

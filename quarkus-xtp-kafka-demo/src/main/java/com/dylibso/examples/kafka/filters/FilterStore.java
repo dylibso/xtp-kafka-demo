@@ -32,6 +32,7 @@ public class FilterStore {
 
     private List<Header> makeHeaders(KafkaFilter f) {
         List<Header> headers = new ArrayList<>();
+        headers.add(new Header("plugin-name", f.name().getBytes(StandardCharsets.UTF_8)));
         headers.add(new Header("plugin-id", f.extension().id().getBytes(StandardCharsets.UTF_8)));
         headers.add(new Header("plugin-timestamp", f.extension().updatedAt().toString().getBytes(StandardCharsets.UTF_8)));
         return headers;
@@ -65,10 +66,14 @@ public class FilterStore {
         return null;
     }
 
-    private com.dylibso.examples.kafka.Record toRecord(ObjectMapper mapper, byte[] bs, List<Header> headers) {
+    private Record toRecord(ObjectMapper mapper, byte[] bs, List<Header> headers) {
         try {
-            com.dylibso.examples.kafka.Record record = mapper.readValue(bs, Record.class);
-            record.headers().addAll(headers);
+            Record record = mapper.readValue(bs, Record.class);
+            List<Header> hs = record.headers();
+            if (hs == null) {
+                return new Record(record.topic(), record.key(), record.value(), headers);
+            }
+            hs.addAll(headers);
             return record;
         } catch (IOException e) {
             throw new UncheckedIOException(e);

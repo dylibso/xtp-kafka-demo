@@ -31,8 +31,8 @@ public class XTPProvider {
         LOGGER.info("The application is starting...");
         this.filterStore = new FilterStore();
         var extensions = fetcher.extensions();
-        for (var ext : extensions.values()) {
-            var filter = fetcher.fetchFilter(ext);
+        for (var kv : extensions.entrySet()) {
+            var filter = fetcher.fetchFilter(kv.getKey(), kv.getValue());
             filterStore.register(filter);
         }
     }
@@ -45,7 +45,7 @@ public class XTPProvider {
             if (updated == null) {
                 continue;
             }
-            var filter = fetcher.fetchFilter(updated);
+            var filter = fetcher.fetchFilter(kv.getKey(), updated);
             filterStore.update(filter);
         }
     }

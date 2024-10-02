@@ -22,9 +22,9 @@ public class KafkaFilterFetcher {
         return this.xtpService.fetch(extensionPoint, guestKey);
     }
 
-    public KafkaFilter fetchFilter(XTPService.Extension ext) throws IOException {
+    public KafkaFilter fetchFilter(String pluginName, XTPService.Extension ext) throws IOException {
         try (InputStream is = this.xtpService.fetchContent(ext.contentAddress())) {
-            return KafkaFilter.fromInputStream(ext, is);
+            return KafkaFilter.fromInputStream(pluginName, ext, is);
         }
     }
 }
