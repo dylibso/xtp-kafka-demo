@@ -1,5 +1,6 @@
 package com.dylibso.examples.kafka;
 
+import com.dylibso.examples.xtp.XTPService;
 import io.quarkus.test.junit.QuarkusTest;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;

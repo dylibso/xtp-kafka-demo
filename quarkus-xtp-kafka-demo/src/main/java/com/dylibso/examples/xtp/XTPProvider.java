@@ -1,5 +1,7 @@
-package com.dylibso.examples.kafka;
+package com.dylibso.examples.xtp;
 
+import com.dylibso.examples.kafka.filters.FilterStore;
+import com.dylibso.examples.kafka.filters.KafkaFilterFetcher;
 import io.quarkus.runtime.Startup;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -1,5 +1,6 @@
-package com.dylibso.examples.kafka;
+package com.dylibso.examples.kafka.filters;
 
+import com.dylibso.examples.xtp.XTPService;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;

@@ -1,4 +1,4 @@
-package com.dylibso.examples.kafka;
+package com.dylibso.examples.xtp;
 
 import io.smallrye.common.annotation.Blocking;
 import jakarta.ws.rs.GET;

@@ -1,5 +1,6 @@
 package com.dylibso.examples.kafka;
 
+import com.dylibso.examples.kafka.filters.FilterStore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.reactive.messaging.kafka.KafkaRecord;

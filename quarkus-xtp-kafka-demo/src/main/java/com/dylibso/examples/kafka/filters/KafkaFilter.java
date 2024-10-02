@@ -1,5 +1,7 @@
-package com.dylibso.examples.kafka;
+package com.dylibso.examples.kafka.filters;
 
+import com.dylibso.examples.kafka.Record;
+import com.dylibso.examples.xtp.XTPService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.extism.chicory.sdk.Manifest;
 import org.extism.chicory.sdk.ManifestWasm;
@@ -30,7 +32,7 @@ public class KafkaFilter {
         return extension;
     }
 
-    public Record transform(Record record, ObjectMapper mapper) throws IOException {
+    public com.dylibso.examples.kafka.Record transform(com.dylibso.examples.kafka.Record record, ObjectMapper mapper) throws IOException {
         return mapper.readValue(transformBytes(mapper.writeValueAsBytes(record)), Record.class);
     }
 

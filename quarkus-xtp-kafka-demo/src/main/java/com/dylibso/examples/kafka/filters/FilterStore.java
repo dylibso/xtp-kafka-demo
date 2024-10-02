@@ -1,5 +1,8 @@
-package com.dylibso.examples.kafka;
+package com.dylibso.examples.kafka.filters;
 
+import com.dylibso.examples.kafka.Header;
+import com.dylibso.examples.kafka.Record;
+import com.dylibso.examples.xtp.XTPService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Multi;
 
@@ -16,7 +19,7 @@ public class FilterStore {
     /**
      * Applies the transform to the given record, serializing with the provided ObjectMapper.
      */
-    public Multi<Record> transform(Record r, ObjectMapper mapper) throws IOException {
+    public Multi<com.dylibso.examples.kafka.Record> transform(com.dylibso.examples.kafka.Record r, ObjectMapper mapper) throws IOException {
         byte[] bytes = mapper.writeValueAsBytes(r);
         return Multi.createFrom()
                 .iterable(filters.values())
@@ -62,9 +65,9 @@ public class FilterStore {
         return null;
     }
 
-    private Record toRecord(ObjectMapper mapper, byte[] bs, List<Header> headers) {
+    private com.dylibso.examples.kafka.Record toRecord(ObjectMapper mapper, byte[] bs, List<Header> headers) {
         try {
-            Record record = mapper.readValue(bs, Record.class);
+            com.dylibso.examples.kafka.Record record = mapper.readValue(bs, Record.class);
             record.headers().addAll(headers);
             return record;
         } catch (IOException e) {
