@@ -26,8 +26,7 @@ public class Processor {
     Multi<Message<byte[]>> read(KafkaRecord<byte[], byte[]> pricingData) throws IOException {
         var r = Record.of(pricingData);
         return filters.transform(r, mapper)
-                .map(rec -> (Message<byte[]>)
-                        KafkaRecord.of(rec.topic(), rec.key(), rec.value()))
+                .map(Record::toOutgoingKafkaRecord)
                 .onTermination().invoke(pricingData::ack);
     }
 }

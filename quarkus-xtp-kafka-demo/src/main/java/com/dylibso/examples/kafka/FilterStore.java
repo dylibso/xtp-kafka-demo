@@ -5,6 +5,9 @@ import io.smallrye.mutiny.Multi;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FilterStore {
@@ -17,8 +20,18 @@ public class FilterStore {
         byte[] bytes = mapper.writeValueAsBytes(r);
         return Multi.createFrom()
                 .iterable(filters.values())
-                .map(f -> f.transformBytes(bytes))
-                .map(bs -> toRecord(mapper, bs));
+                .map(f -> {
+                    byte[] bs = f.transformBytes(bytes);
+                    List<Header> headers = makeHeaders(f);
+                    return toRecord(mapper, bs, headers);
+                });
+    }
+
+    private List<Header> makeHeaders(KafkaFilter f) {
+        List<Header> headers = new ArrayList<>();
+        headers.add(new Header("plugin-id", f.extension().id().getBytes(StandardCharsets.UTF_8)));
+        headers.add(new Header("plugin-timestamp", f.extension().updatedAt().toString().getBytes(StandardCharsets.UTF_8)));
+        return headers;
     }
 
     /**
@@ -49,9 +62,11 @@ public class FilterStore {
         return null;
     }
 
-    private Record toRecord(ObjectMapper mapper, byte[] bs) {
+    private Record toRecord(ObjectMapper mapper, byte[] bs, List<Header> headers) {
         try {
-            return mapper.readValue(bs, Record.class);
+            Record record = mapper.readValue(bs, Record.class);
+            record.headers().addAll(headers);
+            return record;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
