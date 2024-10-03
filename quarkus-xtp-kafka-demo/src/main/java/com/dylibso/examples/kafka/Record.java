@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record Record(String topic, byte[] key, byte[] value, List<Header> headers) {
-    static Record of(KafkaRecord<byte[], byte[]> kr) {
+    public static Record of(KafkaRecord<byte[], byte[]> kr) {
         return new Record(kr.getTopic(), kr.getKey(), kr.getPayload(), extractHeaders(kr));
     }
 

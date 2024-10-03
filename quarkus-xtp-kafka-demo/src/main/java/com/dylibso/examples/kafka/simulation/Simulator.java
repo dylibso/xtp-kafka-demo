@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 public class Simulator {
     private static final Logger LOGGER = Logger.getLogger(Simulator.class);
@@ -24,8 +25,11 @@ public class Simulator {
             LOGGER.info("EOF");
             return null;
         }
-        LOGGER.info(line);
-        return line.getBytes(StandardCharsets.UTF_8);
+        String noDate = line.substring(line.indexOf(','));
+
+        String simulatedLine = LocalDateTime.now() + noDate;
+        LOGGER.info(simulatedLine);
+        return simulatedLine.getBytes(StandardCharsets.UTF_8);
     }
 
 

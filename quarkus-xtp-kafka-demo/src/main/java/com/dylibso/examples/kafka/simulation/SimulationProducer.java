@@ -3,6 +3,7 @@ package com.dylibso.examples.kafka.simulation;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.ScheduledExecution;
 import io.smallrye.reactive.messaging.kafka.KafkaRecord;
+import io.vertx.core.Vertx;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,7 +26,10 @@ public class SimulationProducer {
 
     @Inject SimulationSkipPredicated cfg;
 
-    @Scheduled(every = "5s", skipExecutionIf = SimulationSkipPredicated.class)
+    @Inject
+    Vertx vertx;
+
+    @Scheduled(every = "1s", skipExecutionIf = SimulationSkipPredicated.class)
     void produce() throws IOException {
         if (simulator == null) {
             this.simulator = new Simulator("../EURUSD_1min.txt");

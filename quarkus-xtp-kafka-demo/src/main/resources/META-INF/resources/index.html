@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+<!--    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js"></script>-->
+<!--    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3"></script>-->
+<!--    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.8.0/dist/chartjs-plugin-streaming.min.js"></script>-->
+<!--    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pusher/4.1.0/pusher.js"></script>-->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@1.27.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
+
+    <script type="text/javascript" src="stream.js"></script>
+
+    <style>
+        body {
+            background: #222;
+            color: #999;
+            font-family: sans-serif;
+        }
+    </style>
+
+    <title>XTP Kafka Demo</title>
+
+</head>
+<body onload="loadWSSDataAndDisplayCanvas()">
+<h1>Charts</h1>
+<div class="chart-container" style="position: relative; height:30vh; width:40vw">
+    <canvas id="chart"></canvas>
+</div>
+
+</body>
+</html>

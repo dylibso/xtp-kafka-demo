@@ -20,7 +20,7 @@ public class FilterStore {
     /**
      * Applies the transform to the given record, serializing with the provided ObjectMapper.
      */
-    public Multi<com.dylibso.examples.kafka.Record> transform(com.dylibso.examples.kafka.Record r, ObjectMapper mapper) throws IOException {
+    public Multi<Record> transform(Record r, ObjectMapper mapper) throws IOException {
         byte[] bytes = mapper.writeValueAsBytes(r);
         return Multi.createFrom()
                 .iterable(filters.values())

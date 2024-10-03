@@ -48,7 +48,7 @@ func Transform(input Record) (r []Record, err error) {
 		vwap := w.vwap()
 
 		pdk.Log(pdk.LogInfo, fmt.Sprintf("%v", vwap))
-		return append(r, Record{Topic: "vwap", Key: input.Key, Value: []byte(fmt.Sprintf("%s,%f", p.date, vwap))}), nil
+		return append(r, Record{Topic: "mavg", Key: input.Key, Value: []byte(fmt.Sprintf("%s,%f", p.date, vwap))}), nil
 	}
 }
 
