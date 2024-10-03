@@ -40,8 +40,8 @@ public class XTPProvider {
     @Scheduled(delay = 100, every = "30s")
     void checkUpdates() throws IOException {
         var extensions = fetcher.extensions();
-        for (XTPService.Extension ext : extensions.values()) {
-            var updated = filterStore.isNewer(ext);
+        for (var kv : extensions.entrySet()) {
+            var updated = filterStore.isNewer(kv.getValue());
             if (updated == null) {
                 continue;
             }

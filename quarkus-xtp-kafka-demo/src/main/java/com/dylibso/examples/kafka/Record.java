@@ -14,6 +14,12 @@ public record Record(String topic, byte[] key, byte[] value, List<Header> header
         return new Record(kr.getTopic(), kr.getKey(), kr.getPayload(), extractHeaders(kr));
     }
 
+    public Record withHeaders(List<Header> headers) {
+        List<Header> h = this.headers == null ? new ArrayList<>() : new ArrayList<>(this.headers);
+        h.addAll(headers);
+        return new Record(topic, key, value, h);
+    }
+
     private static List<Header> extractHeaders(KafkaRecord<byte[], byte[]> kr) {
         var l = new ArrayList<Header>();
         for (var h : kr.getHeaders()) {

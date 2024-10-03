@@ -15,7 +15,7 @@ func init() {
 // This function takes a Record and returns a Record.
 // It takes Record as input (A plain key/value record.)
 // And returns Record (A plain key/value record.)
-func Transform(input Record) (Record, error) {
+func Transform(input Record) ([]Record, error) {
 	input.Topic = topic
-	return input, nil
+	return []Record{input}, nil
 }

@@ -2,6 +2,7 @@ package com.dylibso.examples.kafka.filters;
 
 import com.dylibso.examples.kafka.Record;
 import com.dylibso.examples.xtp.XTPService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.extism.chicory.sdk.Manifest;
 import org.extism.chicory.sdk.ManifestWasm;
@@ -10,6 +11,7 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class KafkaFilter {
     public static KafkaFilter fromInputStream(String pluginName, XTPService.Extension ext, InputStream is) throws IOException {
@@ -38,8 +40,8 @@ public class KafkaFilter {
         return extension;
     }
 
-    public com.dylibso.examples.kafka.Record transform(com.dylibso.examples.kafka.Record record, ObjectMapper mapper) throws IOException {
-        return mapper.readValue(transformBytes(mapper.writeValueAsBytes(record)), Record.class);
+    public List<Record> transform(com.dylibso.examples.kafka.Record record, ObjectMapper mapper) throws IOException {
+        return mapper.readValue(transformBytes(mapper.writeValueAsBytes(record)), new TypeReference<List<Record>>() {});
     }
 
     public byte[] transformBytes(byte[] recordBytes) {

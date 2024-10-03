@@ -3,6 +3,7 @@ package com.dylibso.examples.kafka.filters;
 import com.dylibso.examples.kafka.Header;
 import com.dylibso.examples.kafka.Record;
 import com.dylibso.examples.xtp.XTPService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Multi;
 
@@ -23,10 +24,10 @@ public class FilterStore {
         byte[] bytes = mapper.writeValueAsBytes(r);
         return Multi.createFrom()
                 .iterable(filters.values())
-                .map(f -> {
+                .flatMap(f -> {
                     byte[] bs = f.transformBytes(bytes);
                     List<Header> headers = makeHeaders(f);
-                    return toRecord(mapper, bs, headers);
+                    return Multi.createFrom().iterable(toRecords(mapper, bs, headers));
                 });
     }
 
@@ -66,15 +67,11 @@ public class FilterStore {
         return null;
     }
 
-    private Record toRecord(ObjectMapper mapper, byte[] bs, List<Header> headers) {
+    private List<Record> toRecords(ObjectMapper mapper, byte[] bs, List<Header> headers) {
         try {
-            Record record = mapper.readValue(bs, Record.class);
-            List<Header> hs = record.headers();
-            if (hs == null) {
-                return new Record(record.topic(), record.key(), record.value(), headers);
-            }
-            hs.addAll(headers);
-            return record;
+            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {});
+            records.replaceAll(r -> r.withHeaders(headers));
+            return records;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
