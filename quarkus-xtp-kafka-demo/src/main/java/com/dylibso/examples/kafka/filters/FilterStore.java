@@ -6,15 +6,20 @@ import com.dylibso.examples.xtp.XTPService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Multi;
+import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FilterStore {
+    private static final Logger LOGGER = Logger.getLogger(FilterStore.class);
+
     private final ConcurrentHashMap<String, KafkaFilter> filters = new ConcurrentHashMap<>();
 
     /**
@@ -44,6 +49,8 @@ public class FilterStore {
      */
     public void register(KafkaFilter f) {
         filters.put(f.extension().id(), f);
+        LOGGER.infof("Registered filter: '%s' with id '%s'",
+                f.name(), f.extension().id());
     }
 
     /**
@@ -51,18 +58,21 @@ public class FilterStore {
      * by checking its property {@link XTPService.Extension#updatedAt()}.
      */
     public void update(KafkaFilter kafkaFilter) {
-        filters.merge(kafkaFilter.extension().id(), kafkaFilter, (existing, candidate) ->
-                existing.extension().updatedAt().isBefore(candidate.extension().updatedAt()) ?
-                        candidate : existing);
+        filters.merge(kafkaFilter.extension().id(), kafkaFilter, (existing, candidate) -> {
+            LOGGER.infof("Updating filter: '%s' from id '%s' to id '%s'",
+                    kafkaFilter.name(), existing.extension().id(), candidate.extension().id());
+            return existing.extension().updatedAt().isBefore(candidate.extension().updatedAt()) ?
+                    candidate : existing;
+        });
     }
 
-    public XTPService.Extension isNewer(XTPService.Extension candidate) {
+    public Status compare(XTPService.Extension candidate) {
         KafkaFilter current = filters.get(candidate.id());
         if (current == null) {
-            return candidate;
+            return Status.Updated;
         }
         if (current.extension().updatedAt().isBefore(candidate.updatedAt())) {
-            return candidate;
+            return Status.Updated;
         }
         return null;
     }
@@ -75,6 +85,38 @@ public class FilterStore {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public Map<String, Status> compareStored(Map<String, XTPService.Extension> extensions) {
+        var result = new HashMap<String, Status>();
+        for (String name : extensions.keySet()) {
+            result.put(name, Status.Updated);
+        }
+        for (var f : this.filters.values()) {
+            var name = f.name();
+            if (extensions.containsKey(name)) {
+                var candidate = extensions.get(name);
+                KafkaFilter current = filters.get(candidate.id());
+                if (current == null || current.extension().updatedAt().isBefore(candidate.updatedAt())) {
+                    result.put(name, Status.Updated);
+                } else {
+                    result.put(name, Status.Unchanged);
+                }
+            } else {
+                result.put(name, Status.Deleted);
+            }
+        }
+        return result;
+    }
+
+    public void unregister(String name) {
+        KafkaFilter removed = filters.remove(name);
+        LOGGER.infof("Unregistered filter: '%s' with id '%s'",
+                removed.name(), removed.extension().id());
+    }
+
+    public static enum Status {
+        Unchanged, Updated, Deleted
     }
 
 }

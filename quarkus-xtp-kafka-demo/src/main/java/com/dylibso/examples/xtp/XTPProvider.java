@@ -10,6 +10,9 @@ import jakarta.ws.rs.Produces;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
 public class XTPProvider {
@@ -35,18 +38,31 @@ public class XTPProvider {
             var filter = fetcher.fetchFilter(kv.getKey(), kv.getValue());
             filterStore.register(filter);
         }
+        var scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                checkUpdates();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }, 5, 1, TimeUnit.SECONDS);
     }
 
-    @Scheduled(delay = 100, every = "30s")
+//    @Scheduled(delay = 100, every = "10s")
     void checkUpdates() throws IOException {
         var extensions = fetcher.extensions();
-        for (var kv : extensions.entrySet()) {
-            var updated = filterStore.isNewer(kv.getValue());
-            if (updated == null) {
-                continue;
+
+        var results = filterStore.compareStored(extensions);
+        for (var kv : results.entrySet()) {
+            final String name = kv.getKey();
+            switch (kv.getValue()) {
+                case Updated -> {
+                    var filter = fetcher.fetchFilter(name, extensions.get(name));
+                    filterStore.update(filter);
+                }
+                case Deleted -> filterStore.unregister(name);
+                case Unchanged -> {}
             }
-            var filter = fetcher.fetchFilter(kv.getKey(), updated);
-            filterStore.update(filter);
         }
     }
 

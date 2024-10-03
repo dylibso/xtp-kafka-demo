@@ -16,19 +16,19 @@ public class Simulator {
     Simulator(String fileName) throws IOException {
         this.reader = new BufferedReader(new FileReader(fileName));
         String heading = reader.readLine();// skip header.
-        LOGGER.infof("heading: %s", heading);
+        LOGGER.debugf("heading: %s", heading);
     }
 
     byte[] next() throws IOException {
         var line = reader.readLine();
         if (line == null) {
-            LOGGER.info("EOF");
+            LOGGER.debugf("EOF");
             return null;
         }
         String noDate = line.substring(line.indexOf(','));
 
         String simulatedLine = LocalDateTime.now() + noDate;
-        LOGGER.info(simulatedLine);
+        LOGGER.debugf(simulatedLine);
         return simulatedLine.getBytes(StandardCharsets.UTF_8);
     }
 

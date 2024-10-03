@@ -45,9 +45,9 @@ public class KafkaFilter {
     }
 
     public byte[] transformBytes(byte[] recordBytes) {
-        logger.infof("transforming: %s", new String(recordBytes));
+        logger.tracef("transforming: %s", new String(recordBytes));
         byte[] result = plugin.call("transform", recordBytes);
-        logger.infof("result: %s", new String(result));
+        logger.tracef("result: %s", new String(result));
         return result;
     }
 
