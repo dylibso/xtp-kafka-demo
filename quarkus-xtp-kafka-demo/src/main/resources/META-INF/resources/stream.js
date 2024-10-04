@@ -29,25 +29,26 @@ const config = {
   options: {
     realtime: {
       duration: 20000,
-      refresh: 400,
+      refresh: 200,
       delay: 300,
     },
-    events: ['click'],
+    // events: ['click'],
     plugins: {
       tooltip: {
-        callbacks: {
-          afterBody: function (context) {
-            const headers = context[0].raw.headers;
-            if (headers != undefined) {
-              const l = [];
-              for (const property in headers) {
-                l.push(`${property}: ${headers[property]}`);
-              }
-              return l;
-            }
-            return null;
-          }
-        }
+        position: 'nearest',
+        // callbacks: {
+        //   afterBody: function (context) {
+        //     const headers = context[0].raw.headers;
+        //     if (headers != undefined) {
+        //       const l = [];
+        //       for (const property in headers) {
+        //         l.push(`${property}: ${headers[property]}`);
+        //       }
+        //       return l;
+        //     }
+        //     return null;
+        //   }
+        // }
       }
     },
 
