@@ -48,12 +48,10 @@ public class XTPProvider {
         }, 5, 1, TimeUnit.SECONDS);
     }
 
-//    @Scheduled(delay = 100, every = "10s")
     void checkUpdates() throws IOException {
         var extensions = fetcher.extensions();
 
         var results = filterStore.compareStored(extensions);
-        LOGGER.infof("update: %s", results);
         for (var kv : results.entrySet()) {
             final String name = kv.getKey();
             switch (kv.getValue()) {

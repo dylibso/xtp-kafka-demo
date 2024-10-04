@@ -7,24 +7,33 @@ const table = {
   "mavg": 1
 }
 
+const datasets = [
+  {
+    borderColor: '#36A2EB',
+    backgroundColor: '#9BD0F5',
+    label: 'Closing Price (EURUSD)',
+    data: []
+  },
+  {
+    borderColor: '#3600EB',
+    backgroundColor: '#9B00F5',
+    label: 'Moving Average (EURUSD)',
+    data: []
+  },
+  {
+    borderColor: '#3600EB',
+    backgroundColor: '#9B00F5',
+    label: 'Moving Average 2 (EURUSD)',
+    data: []
+  },
+
+
+];
+
 const config = {
   type: 'line',
   data: {
-    datasets: [
-      {
-        borderColor: '#36A2EB',
-        backgroundColor: '#9BD0F5',
-        label: 'Closing Price (EURUSD)',
-        data: []
-      },
-      {
-        borderColor: '#3600EB',
-        backgroundColor: '#9B00F5',
-        label: 'Moving Average (EURUSD)',
-        data: []
-      },
-
-    ]
+    datasets: datasets
   },
   options: {
     realtime: {
@@ -36,19 +45,19 @@ const config = {
     plugins: {
       tooltip: {
         position: 'nearest',
-        // callbacks: {
-        //   afterBody: function (context) {
-        //     const headers = context[0].raw.headers;
-        //     if (headers != undefined) {
-        //       const l = [];
-        //       for (const property in headers) {
-        //         l.push(`${property}: ${headers[property]}`);
-        //       }
-        //       return l;
-        //     }
-        //     return null;
-        //   }
-        // }
+        callbacks: {
+          afterBody: function (context) {
+            const headers = context[0].raw.headers;
+            const l = [];
+
+            if (headers != undefined) {
+              for (const property in headers) {
+                l.push(`${property}: ${headers[property]}`);
+              }
+            }
+            return l;
+          }
+        }
       }
     },
 

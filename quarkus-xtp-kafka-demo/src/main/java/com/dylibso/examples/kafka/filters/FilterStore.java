@@ -39,9 +39,14 @@ public class FilterStore {
     private List<Header> makeHeaders(KafkaFilter f) {
         List<Header> headers = new ArrayList<>();
         headers.add(new Header("plugin-name", f.name().getBytes(StandardCharsets.UTF_8)));
-        headers.add(new Header("plugin-id", f.extension().id().getBytes(StandardCharsets.UTF_8)));
+        // headers.add(new Header("plugin-id", f.extension().id().getBytes(StandardCharsets.UTF_8)));
+        headers.add(new Header("plugin-name", pluginNameFromId(f.extension().id()).getBytes(StandardCharsets.UTF_8)));
         headers.add(new Header("plugin-timestamp", f.extension().updatedAt().toString().getBytes(StandardCharsets.UTF_8)));
         return headers;
+    }
+
+    private String pluginNameFromId(String id) {
+        return id.substring(id.lastIndexOf('/') + 1);
     }
 
     /**
@@ -61,14 +66,19 @@ public class FilterStore {
         filters.merge(kafkaFilter.name(), kafkaFilter, (existing, candidate) -> {
             LOGGER.infof("Updating filter: '%s' from id '%s' to id '%s'",
                     kafkaFilter.name(), existing.extension().id(), candidate.extension().id());
-            return existing.extension().updatedAt().isBefore(candidate.extension().updatedAt()) ?
-                    candidate : existing;
+            if (!existing.extension().id().equals(candidate.extension().id()) ||
+                    existing.extension().updatedAt().isBefore(candidate.extension().updatedAt())) {
+                return candidate;
+            } else {
+                return existing;
+            }
         });
     }
 
     private List<Record> toRecords(ObjectMapper mapper, byte[] bs, List<Header> headers) {
         try {
-            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {});
+            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {
+            });
             records.replaceAll(r -> r.withHeaders(headers));
             return records;
         } catch (IOException e) {
@@ -86,7 +96,10 @@ public class FilterStore {
             if (extensions.containsKey(name)) {
                 var candidate = extensions.get(name);
                 KafkaFilter current = filters.get(name);
-                if (current == null || current.extension().updatedAt().isBefore(candidate.updatedAt())) {
+                if (current == null || // no earlier binding
+                        !current.extension().id().equals(candidate.id()) || // different extension for the same name binding
+                        current.extension().updatedAt().isBefore(candidate.updatedAt()) // newer version of the previous extension
+                ) {
                     result.put(name, Status.Updated);
                 } else {
                     result.put(name, Status.Unchanged);
