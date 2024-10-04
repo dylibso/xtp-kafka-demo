@@ -2,33 +2,34 @@ Chart.defaults.backgroundColor = '#eee';
 Chart.defaults.borderColor = '#ccc';
 Chart.defaults.color = '#999';
 
-const table = {
-  "pricing-data": 0,
-  "mavg": 1
-}
+var randomColor = (function () {
+  var randomInt = function (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+  return function () {
+    var h = randomInt(0, 360);
+    var s = randomInt(42, 98);
+    var l = randomInt(38, 90);
+    return "hsl(" + h + "," + s + "%," + l + "%)";
+  };
+})();
 
-const datasets = [
-  {
-    borderColor: '#36A2EB',
-    backgroundColor: '#9BD0F5',
-    label: 'Closing Price (EURUSD)',
-    data: []
-  },
-  {
-    borderColor: '#3600EB',
-    backgroundColor: '#9B00F5',
-    label: 'Moving Average (EURUSD)',
-    data: []
-  },
-  {
-    borderColor: '#3600EB',
-    backgroundColor: '#9B00F5',
-    label: 'Moving Average 2 (EURUSD)',
-    data: []
-  },
+palette = [
+  '#FF5EC7',
+  '#614FC9',
+  '#82FF54',
+  '#E9FF57',
+  '#52FF8B',
+  '#FF5C64',
+  '#4FFFF3',
+  '#FFB259',
+  '#4DA0FF',
+  '#D560FC',
+]
 
+const table = {}
 
-];
+const datasets = [];
 
 const config = {
   type: 'line',
@@ -40,6 +41,12 @@ const config = {
       duration: 20000,
       refresh: 200,
       delay: 300,
+    },
+    elements: {
+      point: {
+        radius : customRadius,
+        display: true
+      }
     },
     // events: ['click'],
     plugins: {
@@ -58,10 +65,14 @@ const config = {
             return l;
           }
         }
-      }
+      },
     },
 
     scales: {
+      // y: {
+      //   suggestedMin: 1.384,
+      //   suggestedMax: 1.385,
+      // },
       x: {
         type: 'realtime',
         realtime: {
@@ -71,11 +82,7 @@ const config = {
               return;
             }
             const index = table[v.type]
-            chart.data.datasets[index].data.push({
-              x: v.x,
-              y: v.y,
-              headers: v.headers,
-            });
+            chart.data.datasets[index].data.push(v);
           }
         }
       }
@@ -84,27 +91,23 @@ const config = {
 };
 
 const buf = []
+const lastTime = {}
+const lastValue = {}
 
+function customRadius(ctx) {
+  if (ctx?.raw?.highlight) {
+    return 10;
+  } else {
+    return 4
+  }
+
+}
 
 function loadWSSDataAndDisplayCanvas() {
 
   let streamer = new WebSocket('ws://localhost:8080/viz/me');
 
-  streamer.onmessage = (message) => {
-    console.log(message);
-    let data = JSON.parse(message.data);
 
-    let timestamp = new Date(data['date']);
-    let price = data['price'];
-
-    buf.push({
-      type: data.type,
-      x: timestamp,
-      y: price,
-      headers: data.headers,
-    });
-
-  }
 
   config.options.onClick = e => {
     config.options.realtime.pause = !!!config.options.realtime.pause
@@ -115,5 +118,49 @@ function loadWSSDataAndDisplayCanvas() {
     config
   );
 
+  streamer.onmessage = (message) => {
+    let data = JSON.parse(message.data);
 
+    let timestamp = new Date(data['date']);
+    let price = data['price'];
+
+
+    const t = lastTime[data.type];
+
+    // Skip out-of-order points;
+    if (t !== undefined && timestamp.getTime() <= t.getTime()) {
+      console.log("received point out-of-order", data, t);
+      return;
+    }
+
+    lastTime[data.type] = timestamp;
+
+    if (table[data.type] === undefined) {
+      const idx = Object.keys(table).length;
+      table[data.type] = idx;
+      const col = palette[ idx % palette.length ];
+      datasets.push({
+        borderColor: col,
+        backgroundColor: col,
+        label: data.type,
+        data: [],
+      })
+      chart.update();
+    }
+
+
+    const lastV = lastValue[data.type];
+    const lastPluginName = lastV?.headers?.['plugin-name'];
+
+    const v = {
+      type: data.type,
+      x: timestamp,
+      y: price,
+      headers: data.headers,
+      highlight: lastPluginName !== undefined && data.headers?.['plugin-name'] != lastPluginName,
+    };
+    lastValue[data.type] = v;
+    buf.push(v);
+
+  }
 };

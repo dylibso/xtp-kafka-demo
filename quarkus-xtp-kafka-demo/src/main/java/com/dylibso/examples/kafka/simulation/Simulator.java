@@ -28,7 +28,7 @@ public class Simulator {
         String noDate = line.substring(line.indexOf(','));
 
         String simulatedLine = LocalDateTime.now() + noDate;
-        LOGGER.debugf(simulatedLine);
+//        LOGGER.info(simulatedLine);
         return simulatedLine.getBytes(StandardCharsets.UTF_8);
     }
 

@@ -3,10 +3,7 @@ package com.dylibso.examples.kafka.simulation;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.ScheduledExecution;
 import io.smallrye.reactive.messaging.kafka.KafkaRecord;
-import io.vertx.core.Vertx;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -24,10 +21,6 @@ public class SimulationProducer {
 
     Simulator simulator;
 
-    @Inject SimulationSkipPredicated cfg;
-
-    @Inject
-    Vertx vertx;
 
     @Scheduled(every = "1s", skipExecutionIf = SimulationSkipPredicated.class)
     void produce() throws IOException {

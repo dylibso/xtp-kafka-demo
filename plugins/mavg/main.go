@@ -32,8 +32,15 @@ type window struct {
 }
 
 var (
-	w = &window{closing: [period]float64{}, index: 0, denom: 0}
+	w     = &window{closing: [period]float64{}, index: 0, denom: 0}
+	topic = "mavg"
 )
+
+func init() {
+	if name, ok := pdk.GetConfig("topic-name"); ok {
+		topic = name
+	}
+}
 
 // This function takes a Record and returns a Record.
 // It takes Record as input (A plain key/value record.)
@@ -48,7 +55,7 @@ func Transform(input Record) (r []Record, err error) {
 		mavg := w.mavg()
 
 		pdk.Log(pdk.LogInfo, fmt.Sprintf("%v", mavg))
-		return append(r, Record{Topic: "mavg", Key: input.Key, Value: []byte(fmt.Sprintf("%s,%f", p.date, mavg))}), nil
+		return append(r, Record{Topic: topic, Key: input.Key, Value: []byte(fmt.Sprintf("%s,%f", p.date, mavg))}), nil
 	}
 }
 

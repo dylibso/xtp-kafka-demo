@@ -51,7 +51,6 @@ public class WebSocket {
 
     @Incoming("internal-result-broadcast")
     CompletionStage<Void> mavg(Record r) {
-
             var topic = r.topic();
             String[] values = new String(r.value()).split(",");
             StringBuilder sb = new StringBuilder("{");
@@ -68,7 +67,6 @@ public class WebSocket {
             }
             sb.deleteCharAt(sb.length() - 1);
             sb.append("}");
-
             String jsonString = String.format("""
                     {"type":"%s","date":"%s","price":%s,"headers":%s}""", topic, values[0], values[1], sb);
 
@@ -79,12 +77,9 @@ public class WebSocket {
 
     @Incoming("internal-price-broadcast")
     CompletionStage<Void> pricingData(Record r) {
-            var key = new String(r.key());
             String[] values = new String(r.value()).split(",");
-
             String jsonString = String.format("""
                     {"type":"pricing-data","date":"%s","price":%s}""", values[0], values[4]);
-
             broadcast(jsonString);
         return CompletableFuture.completedFuture(null);
     }

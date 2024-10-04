@@ -12,11 +12,17 @@ import org.jboss.logging.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 public class KafkaFilter {
     public static KafkaFilter fromInputStream(String pluginName, XTPService.Extension ext, InputStream is) throws IOException {
         ManifestWasm wasm = ManifestWasm.fromBytes(is.readAllBytes()).build();
-        Plugin plugin = Plugin.ofManifest(Manifest.ofWasms(wasm).build()).build();
+        Plugin plugin = Plugin.ofManifest(
+                Manifest.ofWasms(wasm).build())
+                .withConfig(Map.of(
+                        "filter-name", pluginName,
+                        "topic-name", String.format("%s-output", pluginName)))
+                .build();
         return new KafkaFilter(plugin, pluginName, ext);
     }
 
