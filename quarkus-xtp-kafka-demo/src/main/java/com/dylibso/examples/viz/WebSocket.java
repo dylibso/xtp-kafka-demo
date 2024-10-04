@@ -3,7 +3,6 @@ package com.dylibso.examples.viz;
 import com.dylibso.examples.kafka.Header;
 import com.dylibso.examples.kafka.Record;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.smallrye.reactive.messaging.kafka.KafkaRecord;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.websocket.OnClose;
