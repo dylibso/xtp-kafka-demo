@@ -53,6 +53,7 @@ public class XTPProvider {
         var extensions = fetcher.extensions();
 
         var results = filterStore.compareStored(extensions);
+        LOGGER.infof("update: %s", results);
         for (var kv : results.entrySet()) {
             final String name = kv.getKey();
             switch (kv.getValue()) {

@@ -48,7 +48,7 @@ public class FilterStore {
      * Unconditionally register the given KafkaFilter, overwriting anything already registered.
      */
     public void register(KafkaFilter f) {
-        filters.put(f.extension().id(), f);
+        filters.put(f.name(), f);
         LOGGER.infof("Registered filter: '%s' with id '%s'",
                 f.name(), f.extension().id());
     }
@@ -58,23 +58,12 @@ public class FilterStore {
      * by checking its property {@link XTPService.Extension#updatedAt()}.
      */
     public void update(KafkaFilter kafkaFilter) {
-        filters.merge(kafkaFilter.extension().id(), kafkaFilter, (existing, candidate) -> {
+        filters.merge(kafkaFilter.name(), kafkaFilter, (existing, candidate) -> {
             LOGGER.infof("Updating filter: '%s' from id '%s' to id '%s'",
                     kafkaFilter.name(), existing.extension().id(), candidate.extension().id());
             return existing.extension().updatedAt().isBefore(candidate.extension().updatedAt()) ?
                     candidate : existing;
         });
-    }
-
-    public Status compare(XTPService.Extension candidate) {
-        KafkaFilter current = filters.get(candidate.id());
-        if (current == null) {
-            return Status.Updated;
-        }
-        if (current.extension().updatedAt().isBefore(candidate.updatedAt())) {
-            return Status.Updated;
-        }
-        return null;
     }
 
     private List<Record> toRecords(ObjectMapper mapper, byte[] bs, List<Header> headers) {
@@ -96,7 +85,7 @@ public class FilterStore {
             var name = f.name();
             if (extensions.containsKey(name)) {
                 var candidate = extensions.get(name);
-                KafkaFilter current = filters.get(candidate.id());
+                KafkaFilter current = filters.get(name);
                 if (current == null || current.extension().updatedAt().isBefore(candidate.updatedAt())) {
                     result.put(name, Status.Updated);
                 } else {
