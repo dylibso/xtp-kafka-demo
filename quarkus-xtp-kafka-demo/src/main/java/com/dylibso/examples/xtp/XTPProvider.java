@@ -1,5 +1,6 @@
 package com.dylibso.examples.xtp;
 
+import com.dylibso.chicory.wasm.exceptions.UninstantiableException;
 import com.dylibso.examples.kafka.filters.FilterStore;
 import com.dylibso.examples.kafka.filters.KafkaFilterFetcher;
 import io.quarkus.runtime.Startup;
@@ -35,8 +36,12 @@ public class XTPProvider {
         this.filterStore = new FilterStore();
         var extensions = fetcher.extensions();
         for (var kv : extensions.entrySet()) {
-            var filter = fetcher.fetchFilter(kv.getKey(), kv.getValue());
-            filterStore.register(filter);
+            try {
+                var filter = fetcher.fetchFilter(kv.getKey(), kv.getValue());
+                filterStore.register(filter);
+            } catch (UninstantiableException ex) {
+                LOGGER.error("Could not instantiate", ex);
+            }
         }
         var scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> {

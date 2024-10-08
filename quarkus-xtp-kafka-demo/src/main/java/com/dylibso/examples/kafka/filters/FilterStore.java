@@ -77,8 +77,10 @@ public class FilterStore {
 
     private List<Record> toRecords(ObjectMapper mapper, byte[] bs, List<Header> headers) {
         try {
-            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {
-            });
+            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {});
+            if (records == null) {
+                return List.of();
+            }
             records.replaceAll(r -> r.withHeaders(headers));
             return records;
         } catch (IOException e) {

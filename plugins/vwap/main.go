@@ -23,7 +23,7 @@ type Volatility struct {
 	Value float64
 }
 
-const period = 10
+const period = 20
 
 type window struct {
 	closing [period]float64

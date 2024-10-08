@@ -18,10 +18,9 @@ public class KafkaFilter {
     public static KafkaFilter fromInputStream(String pluginName, XTPService.Extension ext, InputStream is) throws IOException {
         ManifestWasm wasm = ManifestWasm.fromBytes(is.readAllBytes()).build();
         Plugin plugin = Plugin.ofManifest(
-                Manifest.ofWasms(wasm).build())
-                .withConfig(Map.of(
-                        "filter-name", pluginName,
-                        "topic-name", String.format("%s-output", pluginName)))
+                Manifest.ofWasms(wasm).withOptions(new Manifest.Options().withConfig(Map.of(
+                                "filter-name", pluginName,
+                                "topic-name", String.format("%s-output", pluginName)))).build())
                 .build();
         return new KafkaFilter(plugin, pluginName, ext);
     }

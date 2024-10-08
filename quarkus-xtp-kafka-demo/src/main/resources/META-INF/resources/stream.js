@@ -151,13 +151,15 @@ function loadWSSDataAndDisplayCanvas() {
 
     const lastV = lastValue[data.type];
     const lastPluginName = lastV?.headers?.['plugin-name'];
+    const lastPluginUpdate = lastV?.headers?.['plugin-timestamp'];
 
     const v = {
       type: data.type,
       x: timestamp,
       y: price,
       headers: data.headers,
-      highlight: lastPluginName !== undefined && data.headers?.['plugin-name'] != lastPluginName,
+      highlight: (lastPluginName !== undefined && data.headers?.['plugin-name'] != lastPluginName) ||
+                 (lastPluginUpdate !== undefined && data.headers?.['plugin-timestamp'] != lastPluginUpdate)
     };
     lastValue[data.type] = v;
     buf.push(v);
