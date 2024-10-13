@@ -3,7 +3,7 @@ app_id = "app_01j6f7n277e4vrgyr9ey98ps64"
 # This is where 'xtp plugin push' expects to find the wasm file after the build script has run.
 bin = "dist/plugin.wasm"
 extension_point_id = "ext_01j9y0ypnjf17rpsyyt91kzq8h"
-name = "vwap"
+name = "max"
 
 [scripts]
 
@@ -15,7 +15,6 @@ name = "vwap"
 
   # xtp plugin init runs this script before running the format script
   prepare = "go get ./..."
-
 
 [[test]]
   # label this test something recognizable to see in CLI output

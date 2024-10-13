@@ -1,0 +1,2 @@
+#!/bin/bash
+java -jar cli/target/quarkus-app/quarkus-run.jar "$@"
