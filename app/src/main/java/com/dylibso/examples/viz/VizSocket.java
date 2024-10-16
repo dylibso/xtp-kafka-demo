@@ -7,12 +7,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import org.eclipse.microprofile.reactive.messaging.Incoming;
+import org.jboss.logging.Logger;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -21,11 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ServerEndpoint("/viz/{subscriber}")
 @ApplicationScoped
-public class WebSocket {
+public class VizSocket {
 
     @Inject
     ObjectMapper mapper;
-
     Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     @OnOpen
@@ -43,20 +41,12 @@ public class WebSocket {
         sessions.remove(id);
     }
 
-    @OnMessage
-    public void onMessage(String message, @PathParam("subscriber") String id) {}
-
-
-    @Incoming("internal-result-broadcast")
-    CompletionStage<Void> mavg(Record r) throws JsonProcessingException {
-        broadcast(mapper.writeValueAsString(r));
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Incoming("internal-price-broadcast")
-    CompletionStage<Void> pricingData(Record r) throws JsonProcessingException {
-        broadcast(mapper.writeValueAsString(r));
-        return CompletableFuture.completedFuture(null);
+    public void onRecord(Record r) {
+        try {
+            broadcast(mapper.writeValueAsString(r));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void broadcast(String jsonString) {

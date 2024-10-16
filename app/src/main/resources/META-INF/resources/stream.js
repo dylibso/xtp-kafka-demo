@@ -48,7 +48,6 @@ const config = {
         display: true
       }
     },
-    // events: ['click'],
     plugins: {
       tooltip: {
         position: 'nearest',
@@ -69,10 +68,6 @@ const config = {
     },
 
     scales: {
-      // y: {
-      //   suggestedMin: 1.384,
-      //   suggestedMax: 1.385,
-      // },
       x: {
         type: 'realtime',
         realtime: {
@@ -106,9 +101,6 @@ function customRadius(ctx) {
 function loadWSSDataAndDisplayCanvas() {
 
   let streamer = new WebSocket('ws://localhost:8080/viz/me');
-
-
-
   config.options.onClick = e => {
     config.options.realtime.pause = !!!config.options.realtime.pause
   };
@@ -124,16 +116,6 @@ function loadWSSDataAndDisplayCanvas() {
     let timestamp = new Date(data.value.date);
     let price = data.value.price;
 
-
-    const t = lastTime[data.topic];
-
-    // Skip out-of-order points;
-    if (t !== undefined && timestamp.getTime() <= t.getTime()) {
-      console.log("received point out-of-order", data, t);
-      return;
-    }
-
-    lastTime[data.topic] = timestamp;
 
     if (table[data.topic] === undefined) {
       const idx = Object.keys(table).length;
