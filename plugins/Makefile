@@ -10,3 +10,6 @@ build: $(PLUGINS)
 
 test:  
 	$(foreach file, $(PLUGINS), cd $(file) && xtp plugin test && cd ..;)
+
+clean: $(PLUGINS)
+	$(foreach file, $(PLUGINS), rm $(file)/dist/*.wasm;)

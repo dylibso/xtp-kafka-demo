@@ -3,7 +3,8 @@
 ## Requirements
 
 - XTP CLI
-- 
+- JDK 17+
+- Docker (or similar) for the Kafka test container
 
 ## Structure
 

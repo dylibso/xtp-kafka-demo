@@ -44,7 +44,6 @@ public class KafkaTransformStore {
     private List<Header> makeHeaders(KafkaTransform f) {
         List<Header> headers = new ArrayList<>();
         headers.add(new Header("plugin-name", f.name()));
-        // headers.add(new Header("plugin-id", f.extension().id().getBytes(StandardCharsets.UTF_8)));
         headers.add(new Header("plugin-name", pluginNameFromId(f.extension().id())));
         headers.add(new Header("plugin-timestamp", f.extension().updatedAt().toString()));
         return headers;

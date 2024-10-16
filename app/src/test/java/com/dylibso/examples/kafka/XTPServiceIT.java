@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @QuarkusTest
-public class XTPServiceTest {
+public class XTPServiceIT {
     @RestClient
     XTPService svc;
 

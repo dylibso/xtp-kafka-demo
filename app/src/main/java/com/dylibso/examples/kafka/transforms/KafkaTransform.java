@@ -53,9 +53,9 @@ public class KafkaTransform {
     }
 
     public byte[] transformBytes(byte[] recordBytes) {
-        logger.infof("transforming: %s", new String(recordBytes));
+        logger.debugf("transforming: %s", new String(recordBytes));
         byte[] result = plugin.call("transform", recordBytes);
-        logger.infof("result: %s", new String(result));
+        logger.debugf("result: %s", new String(result));
         return result;
     }
 

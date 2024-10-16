@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class KafkaTransformTest {
 
@@ -26,6 +27,8 @@ class KafkaTransformTest {
     @Test
     public void testMaxTransform() throws IOException {
         var max = new File("../plugins/max/dist/plugin.wasm");
+        assumeTrue(max.exists(), "Skipping test, please compile `plugins/max`.");
+
         var fis = new FileInputStream(max);
         var ext = new XTPService.Extension("max", LocalDateTime.now(), "xyz");
         var transform = KafkaTransform.fromInputStream("max", ext, fis);

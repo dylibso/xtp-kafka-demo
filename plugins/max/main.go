@@ -2,8 +2,10 @@ package main
 
 import pdk "github.com/extism/go-pdk"
 
-var max float64 = 0
-var topic string
+var (
+	max   float64 = 0
+	topic string  = "max-output"
+)
 
 func init() {
 	if name, ok := pdk.GetConfig("topic-name"); ok {
@@ -18,6 +20,5 @@ func Transform(input Record) ([]Record, error) {
 	}
 	input.Value.Price = max
 	input.Value.Volume = 0
-	pdk.Log(pdk.LogInfo, input.Topic)
 	return []Record{input}, nil
 }
