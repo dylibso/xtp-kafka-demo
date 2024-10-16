@@ -1,9 +1,7 @@
 package com.dylibso.examples.kafka.simulation;
 
+import com.dylibso.examples.kafka.Order;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.quarkus.runtime.Startup;
 import io.quarkus.scheduler.Scheduled;
 import io.quarkus.scheduler.ScheduledExecution;
 import io.smallrye.reactive.messaging.kafka.KafkaRecord;
@@ -15,11 +13,17 @@ import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The SimulationProducer publishes data on a price-simulator channel,
+ * which writes to a Kafka topic "pricing-data".
+ * <p>
+ * The SimulationProducer can be disabled: in that case, the application
+ * will continue to read data from "pricing-data".
+ */
 @ApplicationScoped
 public class SimulationProducer {
     private static final Logger LOGGER = Logger.getLogger(SimulationProducer.class);
@@ -34,19 +38,20 @@ public class SimulationProducer {
 
     @PostConstruct
     public void init() throws IOException {
-        this.simulator = new Simulator(1.0468, 1.1244, 150, mapper);
+        this.simulator = new Simulator(1.0468, 1.1244, 150);
     }
 
-    @Scheduled(delay = 5, delayUnit = TimeUnit.SECONDS, every = "1s")
+    @Scheduled(delay = 5, delayUnit = TimeUnit.SECONDS, every = "1s", skipExecutionIf = SimulatorNotEnabled.class)
     void produce() throws IOException {
-        byte[] data = this.simulator.next();
+        Order order = this.simulator.next();
+        byte[] data = mapper.writeValueAsBytes(order);
         emitter.send(KafkaRecord.of(
                 "EURUSD".getBytes(StandardCharsets.UTF_8), data));
     }
 
 
     @ApplicationScoped
-    static class SimulationSkipPredicated implements Scheduled.SkipPredicate {
+    static class SimulatorNotEnabled implements Scheduled.SkipPredicate {
         @ConfigProperty(name = "simulator.enabled", defaultValue = "true")
         boolean enabled;
 

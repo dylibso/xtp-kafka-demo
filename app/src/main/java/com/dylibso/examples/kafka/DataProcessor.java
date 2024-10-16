@@ -14,7 +14,7 @@ import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import java.io.IOException;
 
 @ApplicationScoped
-public class Processor {
+public class DataProcessor {
     @Inject
     ObjectMapper mapper;
 
@@ -26,11 +26,11 @@ public class Processor {
 
     @Incoming("pricing-data")
     @Outgoing("processed-price")
-    Multi<Message<byte[]>> read(KafkaRecord<byte[], byte[]> pricingData) throws IOException {
+    Multi<Message<byte[]>> onIncomingRecord(KafkaRecord<byte[], byte[]> pricingData) throws IOException {
         var r = Record.of(pricingData, mapper);
-        socket.onRecord(r);
+        socket.onRecord(r); // Publish the record on the WebSocket
         return transforms.transform(r, mapper)
-                .invoke(socket::onRecord)
+                .invoke(socket::onRecord) // Publish the result on the WebSocket
                 .map(rec -> rec.toOutgoingKafkaRecord(mapper))
                 .onTermination().invoke(pricingData::ack);
     }

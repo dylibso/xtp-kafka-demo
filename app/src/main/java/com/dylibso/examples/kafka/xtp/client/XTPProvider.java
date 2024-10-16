@@ -1,4 +1,4 @@
-package com.dylibso.examples.xtp;
+package com.dylibso.examples.kafka.xtp.client;
 
 import com.dylibso.chicory.wasm.exceptions.UninstantiableException;
 import com.dylibso.examples.kafka.transforms.KafkaTransformStore;
@@ -11,9 +11,11 @@ import jakarta.ws.rs.Produces;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * Fetches the initial data from the XTP service,
+ * then periodically polls it for updates.
+ */
 @ApplicationScoped
 public class XTPProvider {
     private static final Logger LOGGER = Logger.getLogger(XTPProvider.class);
@@ -42,14 +44,6 @@ public class XTPProvider {
                 LOGGER.error("Could not instantiate", ex);
             }
         }
-//        var scheduler = Executors.newSingleThreadScheduledExecutor();
-//        scheduler.scheduleAtFixedRate(() -> {
-//            try {
-//                checkUpdates();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }, 5, 1, TimeUnit.SECONDS);
     }
 
     @Scheduled(every = "1s")

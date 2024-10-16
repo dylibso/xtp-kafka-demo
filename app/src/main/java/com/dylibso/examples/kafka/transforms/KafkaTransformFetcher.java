@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+/**
+ * A wrapper for the bare XTPService that reads the available bindings
+ * and fetches the corresponding artifact from the given name and metadata.
+ */
 @ApplicationScoped
 public class KafkaTransformFetcher {
     @RestClient

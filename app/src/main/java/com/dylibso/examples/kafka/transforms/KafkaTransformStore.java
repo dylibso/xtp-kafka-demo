@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Acts as a repository for the KafkaTransforms, and provides a unified
+ * entry point to apply all the available transforms at once, and
+ * return the results.
+ */
 public class KafkaTransformStore {
     private static final Logger LOGGER = Logger.getLogger(KafkaTransformStore.class);
 
@@ -41,16 +46,33 @@ public class KafkaTransformStore {
                 });
     }
 
+    /**
+     * Create a list of headers from the metadata of the given transform.
+     * <p>
+     * Note: this could be cached instead of being recreated every time!
+     */
     private List<Header> makeHeaders(KafkaTransform f) {
         List<Header> headers = new ArrayList<>();
         headers.add(new Header("plugin-name", f.name()));
-        headers.add(new Header("plugin-name", pluginNameFromId(f.extension().id())));
         headers.add(new Header("plugin-timestamp", f.extension().updatedAt().toString()));
         return headers;
     }
 
-    private String pluginNameFromId(String id) {
-        return id.substring(id.lastIndexOf('/') + 1);
+    /**
+     * Parses the given byte array to a list of Records and append the given additionalHeadrs to it, if any.
+     */
+    private List<Record> toRecords(ObjectMapper mapper, byte[] bs, List<Header> additionalHeaders) {
+        try {
+            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {
+            });
+            if (records == null) {
+                return List.of();
+            }
+            records.replaceAll(r -> r.withHeaders(additionalHeaders));
+            return records;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -79,19 +101,19 @@ public class KafkaTransformStore {
         });
     }
 
-    private List<Record> toRecords(ObjectMapper mapper, byte[] bs, List<Header> headers) {
-        try {
-            List<Record> records = mapper.readValue(bs, new TypeReference<List<Record>>() {});
-            if (records == null) {
-                return List.of();
-            }
-            records.replaceAll(r -> r.withHeaders(headers));
-            return records;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    /**
+     * Remove the plugin with the given name from the store.
+     */
+    public void unregister(String name) {
+        KafkaTransform removed = transforms.remove(name);
+        LOGGER.infof("Unregistered transform: '%s' with id '%s'",
+                removed.name(), removed.extension().id());
     }
 
+    /**
+     * Compare the given mapping Name -> Extension to the transforms in this store
+     * and returns a "diff" mapping Name -> Status.
+     */
     public Map<String, Status> compareStored(Map<String, XTPService.Extension> extensions) {
         var result = new HashMap<String, Status>();
         for (String name : extensions.keySet()) {
@@ -115,12 +137,6 @@ public class KafkaTransformStore {
             }
         }
         return result;
-    }
-
-    public void unregister(String name) {
-        KafkaTransform removed = transforms.remove(name);
-        LOGGER.infof("Unregistered transform: '%s' with id '%s'",
-                removed.name(), removed.extension().id());
     }
 
     public static enum Status {
