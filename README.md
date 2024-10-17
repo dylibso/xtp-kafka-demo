@@ -8,6 +8,9 @@
 
 ## Structure
 
+- **plugins** contains the XTP plugins
+- **app** contains the Quarkus application.
+
 
 ## Building Plugins
 
@@ -36,6 +39,8 @@ xtp.user=<your-user-id>
 
 The user ID is a string that looks like `usr_<alphanumeric-string>`
 
+### Building
+
 ```
 cd app
 ./mvnw verify
@@ -47,10 +52,35 @@ cd app
 ./mvnw quarkus:dev 
 ```
 
-Kafka will listen on `localhost:9092`.
+The Quarkus DevTools will automatically start and shutdown a 
+Kafka broker listening on `localhost:9092`.
+
+### Building a Self-Contained App
+
+```
+cd app
+./mvnw package 
+```
+
+Start with:
+
+```
+java -jar target/quarkus-app/quarkus-run.jar
+```
+
+Make sure that a local Kafka instance is listening on `localhost:9092`. 
+
 
 ### Building a Native Image
 ```
 cd app
 ./mvnw package -Dnative 
 ```
+
+Start with:
+
+```
+./target/quarkus-xtp-kafka-demo-1.0.0-SNAPSHOT-runner
+```
+
+Make sure that a local Kafka instance is listening on `localhost:9092`. 
