@@ -1,0 +1,49 @@
+exports:
+  transform:
+    input:
+      $ref: "#/components/schemas/Record"
+      contentType: application/json
+    output:
+      type: array
+      items:
+        $ref: "#/components/schemas/Record"
+      contentType: application/json
+    description: |
+      This function takes a Record and returns an array of Records.
+version: v1-draft
+components:
+  schemas:
+    Order:
+      properties:
+        date:
+          type: string
+          format: date-time
+          description: Date/time of the order
+        price:
+          type: number
+          format: double
+          description: Closing price of the order
+        volume:
+          type: number
+          description: The volume of the order
+      description: An order from the market.
+    Header:
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      description: A key/value header pair.
+    Record:
+      properties:
+        key:
+          type: string
+        topic:
+          type: string
+        value:
+          $ref: "#/components/schemas/Order"
+        headers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Header"
+      description: A plain key/value record.
